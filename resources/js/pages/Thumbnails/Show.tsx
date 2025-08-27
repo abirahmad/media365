@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import { Page, Card, DataTable, Badge, Button } from '@shopify/polaris';
 import AppLayout from '@/layouts/app-layout';
+import axios from 'axios';
 
 interface ThumbnailImage {
     id: number;
@@ -24,7 +26,28 @@ interface Props {
     request: ThumbnailRequest;
 }
 
-export default function Show({ request }: Props) {
+export default function Show({ request: initialRequest }: Props) {
+    const [request, setRequest] = useState(initialRequest);
+    const [isPolling, setIsPolling] = useState(false);
+
+    useEffect(() => {
+        const pollStatus = async () => {
+            if (isPolling || !request?.id) return;
+            setIsPolling(true);
+            
+            try {
+                const response = await axios.get(`/api/thumbnails/${request.id}/status`);
+                setRequest(response.data.request);
+            } catch (error) {
+                console.error('Polling error:', error);
+            } finally {
+                setIsPolling(false);
+            }
+        };
+
+        const interval = setInterval(pollStatus, 2000); // Poll every 2 seconds
+        return () => clearInterval(interval);
+    }, [request?.id]);
     const getStatusBadge = (status: string) => {
         const statusMap = {
             pending: { status: 'info' as const, children: 'Pending' },

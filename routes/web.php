@@ -14,6 +14,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::resource('thumbnails', \App\Http\Controllers\ThumbnailController::class)
         ->only(['index', 'store', 'show']);
+        
+    // API routes for real-time updates
+    Route::prefix('api')->group(function () {
+        Route::get('thumbnails/status', [\App\Http\Controllers\Api\ThumbnailController::class, 'status']);
+        Route::get('thumbnails/{id}/status', [\App\Http\Controllers\Api\ThumbnailController::class, 'requestStatus']);
+    });
 });
 
 require __DIR__.'/settings.php';

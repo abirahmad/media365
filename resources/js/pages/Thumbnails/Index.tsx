@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
+import axios from 'axios';
 import { Page, Card, FormLayout, TextField, Button, DataTable, Badge, Filters, Pagination } from '@shopify/polaris';
 import AppLayout from '@/layouts/app-layout';
 
@@ -22,16 +23,43 @@ interface Props {
     quotaLimit: number;
 }
 
-export default function Index({ requests, filters, userTier, quotaLimit }: Props) {
+export default function Index({ requests: initialRequests, filters, userTier, quotaLimit }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         image_urls: '',
     });
 
     const [queryValue, setQueryValue] = useState('');
+    const [requests, setRequests] = useState(initialRequests);
+    const [isPolling, setIsPolling] = useState(false);
+
+    useEffect(() => {
+        const pollStatus = async () => {
+            if (isPolling) return;
+            setIsPolling(true);
+            
+            try {
+                const response = await axios.get('/api/thumbnails/status', {
+                    params: { status: filters.status || 'all' }
+                });
+                setRequests(response.data.requests);
+            } catch (error) {
+                console.error('Polling error:', error);
+            } finally {
+                setIsPolling(false);
+            }
+        };
+
+        const interval = setInterval(pollStatus, 3000); // Poll every 3 seconds
+        return () => clearInterval(interval);
+    }, [filters.status]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('thumbnails.store'));
+        post(route('thumbnails.store'), {
+            onSuccess: () => {
+                setData('image_urls', '');
+            }
+        });
     };
 
     const handleFiltersChange = (value: string) => {
