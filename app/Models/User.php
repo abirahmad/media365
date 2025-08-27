@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'tier',
     ];
 
     /**
@@ -44,5 +45,28 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function thumbnailRequests()
+    {
+        return $this->hasMany(ThumbnailRequest::class);
+    }
+
+    public function getQuotaLimit(): int
+    {
+        return match($this->tier) {
+            'pro' => 100,
+            'enterprise' => 200,
+            default => 50
+        };
+    }
+
+    public function getPriority(): int
+    {
+        return match($this->tier) {
+            'enterprise' => 3,
+            'pro' => 2,
+            default => 1
+        };
     }
 }

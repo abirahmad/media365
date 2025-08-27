@@ -1,0 +1,16 @@
+@echo off
+echo Starting Laravel Queue Workers for Thumbnail Processing...
+echo.
+echo Starting High Priority Queue (Enterprise users)...
+start "High Priority Queue" cmd /k "php artisan queue:work --queue=thumbnails-high --sleep=1 --tries=3"
+
+echo Starting Medium Priority Queue (Pro users)...
+start "Medium Priority Queue" cmd /k "php artisan queue:work --queue=thumbnails-medium --sleep=2 --tries=3"
+
+echo Starting Low Priority Queue (Free users)...
+start "Low Priority Queue" cmd /k "php artisan queue:work --queue=thumbnails-low --sleep=3 --tries=3"
+
+echo.
+echo All queue workers started! Check the opened command windows.
+echo Press any key to exit...
+pause >nul
