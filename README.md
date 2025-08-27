@@ -134,26 +134,7 @@ resources/js/
 
 ## Development
 
-### Queue Monitoring
-```bash
-# Monitor queue status
-php artisan queue:monitor
-
-# Clear failed jobs
-php artisan queue:clear
-
-# Restart queue workers
-php artisan queue:restart
-```
-
 ### Frontend Development
 ```bash
 # Development mode
 npm run dev
-
-## Troubleshooting
-
-### Queue Not Processing
-- Ensure queue workers are running
-- Check database connection
-- Verify Laravel logs: `storage/logs/laravel.log`
